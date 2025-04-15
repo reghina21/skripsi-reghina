@@ -3,18 +3,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
-
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 
-# Sidebar Navigation
-menu = st.sidebar.radio("Pilih Fitur", ["📁 Dataset", "📈 Visualisasi Dataset", "🧠 Model", "🔮 Hasil Prediksi"])
-
-# Global Data Container
+# Inisialisasi state
 if 'df' not in st.session_state:
     st.session_state.df = None
+if 'predicted_df' not in st.session_state:
+    st.session_state.predicted_df = None
 
-# 1. Dataset
-if menu == "📁 Dataset":
+# Navigasi atas dengan tabs
+tabs = st.tabs(["📁 Dataset", "📈 Visualisasi Dataset", "🧠 Model", "🔮 Hasil Prediksi"])
+
+# 1. Dataset Tab
+with tabs[0]:
     st.subheader("Upload Dataset Kurs")
     uploaded_file = st.file_uploader("Upload file CSV dengan kolom: tanggal, beli_yuan, jual_yuan, beli_dollar, jual_dollar", type=["csv"])
 
