@@ -17,10 +17,10 @@ tabs = st.tabs(["📁 Dataset", "📈 Visualisasi Dataset", "🧠 Model", "🔮 
 # 1. Dataset Tab
 with tabs[0]:
     st.subheader("Upload Dataset Kurs")
-    uploaded_file = st.file_uploader("Upload file CSV dengan kolom: tanggal, beli_yuan, jual_yuan, beli_dollar, jual_dollar", type=["csv"])
+    uploaded_file = st.file_uploader("Upload file excel dengan kolom: tanggal, beli_yuan, jual_yuan, beli_dollar, jual_dollar", type=["csv"])
 
     if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file, parse_dates=["tanggal"])
+        df = pd.read_excel(uploaded_file, parse_dates=["tanggal"])
         df.sort_values("tanggal", inplace=True)
         st.session_state.df = df
         st.success("✅ Dataset berhasil diupload!")
