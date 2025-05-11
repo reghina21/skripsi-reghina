@@ -99,13 +99,6 @@ with tabs[3]:
 
     if st.session_state.preprocessed:
         df_kurs_jual = st.session_state.df_kurs_jual.copy()
-
-        # --- 1. Tentukan jumlah interval dan buat Fuzzy Set ---
-        jml_interval = st.slider("Jumlah Interval Fuzzy:", 3, 10, 5)
-        min_val = df_kurs_jual["Kurs Jual"].min()
-        max_val = df_kurs_jual["Kurs Jual"].max()
-        interval_width = (max_val - min_val) / jml_interval
-
         intervals = []
         fuzzy_sets = []
         for i in range(jml_interval):
