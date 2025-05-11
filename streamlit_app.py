@@ -36,7 +36,7 @@ with tabs[0]:
                 st.dataframe(df_raw)
         except Exception as e:
             st.error(f"❌ Gagal membaca file: {e}")
-    elif st.session_state.get('df_raw') is not None:
+    elif 'df_raw' in st.session_state:
         st.info("📄 Dataset sebelumnya:")
         st.dataframe(st.session_state.df_raw)
 
@@ -44,7 +44,7 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("Hasil Preprocessing Data Kurs")
 
-    if st.session_state.get('df_raw') is not None:
+    if 'df_raw' in st.session_state:
         df = st.session_state.df_raw.copy()
         df.drop(columns=["NO", "Nilai"], inplace=True)
         df["Tanggal"] = pd.to_datetime(df["Tanggal"])
@@ -77,7 +77,7 @@ with tabs[1]:
 # Tab 3: Visualisasi Dataset
 with tabs[2]:
     st.subheader("Visualisasi Dataset Terpilih")
-    if st.session_state.get('preprocessed', False):
+    if 'preprocessed' in st.session_state and st.session_state.preprocessed:
         df = st.session_state.df
         selected_cols = st.multiselect("Pilih kolom kurs untuk divisualisasikan:", df.columns.tolist(), default=df.columns.tolist())
 
@@ -97,7 +97,7 @@ with tabs[2]:
 with tabs[3]:
     st.subheader("Model Peramalan Fuzzy untuk Kurs Jual")
 
-    if st.session_state.preprocessed:
+    if 'preprocessed' in st.session_state and st.session_state.preprocessed:
         df_kurs_jual = st.session_state.df_kurs_jual.copy()
 
         # --- Tetapkan jumlah interval tetap (misalnya 5 interval) ---
