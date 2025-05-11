@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 
-# Inisialisasi state
-if 'df' not in st.session_state:
-    st.session_state.df = None
-if 'predicted_df' not in st.session_state:
-    st.session_state.predicted_df = None
-
 # Navigasi atas dengan tabs
-tabs = st.tabs(["📁 Dataset", "📈 Visualisasi Dataset", "🧠 Model", "🔮 Hasil Prediksi"])
+tabs = st.tabs([
+    "📁 Dataset",
+    "🧹 Preprocessing",
+    "📈 Visualisasi Dataset",
+    "🧠 Model",
+    "🔮 Hasil Prediksi"
+])
 
-# 1. Dataset Tab
+# Tab 1: Upload Dataset
 with tabs[0]:
     st.subheader("Upload Dataset Kurs")
     uploaded_file = st.file_uploader(
@@ -22,38 +22,34 @@ with tabs[0]:
         type=["xlsx"]
     )
 
-    if uploaded_file is not None:
+    if uploaded_file:
         try:
-            df = pd.read_excel(uploaded_file)
-
+            df_raw = pd.read_excel(uploaded_file)
             required_columns = {"NO", "Nilai", "Kurs Jual", "Kurs Beli", "Tanggal"}
-            if not required_columns.issubset(df.columns):
+
+            if not required_columns.issubset(df_raw.columns):
                 st.error(f"❌ Kolom tidak lengkap! Harus ada kolom: {', '.join(required_columns)}")
             else:
-                df["Tanggal"] = pd.to_datetime(df["Tanggal"])
-                df.sort_values("Tanggal", inplace=True)
-                st.session_state.df = df
+                st.session_state.df_raw = df_raw
+                st.session_state.preprocessed = False
                 st.success("✅ Dataset berhasil diupload!")
+                st.dataframe(df_raw)
         except Exception as e:
-            st.error(f"❌ Terjadi kesalahan saat membaca file: {e}")
-
-    if st.session_state.df is not None:
-        st.write("📄 Data Kurs:")
-        st.dataframe(st.session_state.df)
+            st.error(f"❌ Gagal membaca file: {e}")
+    elif st.session_state.get('df_raw') is not None:
+        st.info("📄 Dataset sebelumnya:")
+        st.dataframe(st.session_state.df_raw)
 
 # Tab 2: Preprocessing
 with tabs[1]:
     st.subheader("Hasil Preprocessing Data Kurs")
 
-    if 'df_raw' in st.session_state:
+    if st.session_state.get('df_raw') is not None:
         df = st.session_state.df_raw.copy()
-
-        # Preprocessing sesuai instruksi
         df.drop(columns=["NO", "Nilai"], inplace=True)
         df["Tanggal"] = pd.to_datetime(df["Tanggal"])
         df.sort_values("Tanggal", inplace=True)
         df.set_index("Tanggal", inplace=True)
-        df.sort_index(inplace=True)
 
         df_kurs_jual = df[["Kurs Jual"]].copy()
         df_kurs_beli = df[["Kurs Beli"]].copy()
@@ -66,7 +62,6 @@ with tabs[1]:
         st.write("✅ Data setelah preprocessing:")
         st.dataframe(df.tail())
 
-        # Visualisasi hasil preprocessing
         st.subheader("📊 Visualisasi Kurs Jual dan Beli")
         fig, ax = plt.subplots(figsize=(12, 5))
         ax.plot(df_kurs_jual, label="Kurs Jual", color="green")
@@ -76,14 +71,13 @@ with tabs[1]:
         ax.set_ylabel("Nilai Kurs")
         ax.legend()
         st.pyplot(fig)
-
     else:
         st.warning("Mohon upload file terlebih dahulu di tab Dataset.")
 
 # Tab 3: Visualisasi Dataset
 with tabs[2]:
     st.subheader("Visualisasi Dataset Terpilih")
-    if st.session_state.preprocessed:
+    if st.session_state.get('preprocessed', False):
         df = st.session_state.df
         selected_cols = st.multiselect("Pilih kolom kurs untuk divisualisasikan:", df.columns.tolist(), default=df.columns.tolist())
 
@@ -102,10 +96,10 @@ with tabs[2]:
 # Tab 4: Model Dummy
 with tabs[3]:
     st.subheader("Model Peramalan (Moving Average Dummy)")
-    if st.session_state.preprocessed:
+    if st.session_state.get('preprocessed', False):
         df = st.session_state.df.copy()
-
         window = st.slider("Pilih window size (moving average):", 2, 10, 3)
+
         for col in df.columns:
             df[f"Prediksi {col}"] = df[col].rolling(window=window).mean()
 
@@ -118,7 +112,7 @@ with tabs[3]:
 # Tab 5: Hasil Prediksi
 with tabs[4]:
     st.subheader("Visualisasi Hasil Prediksi")
-    if 'df_prediksi' in st.session_state:
+    if st.session_state.get('df_prediksi') is not None:
         df = st.session_state.df_prediksi
         kolom = st.selectbox("Pilih kolom kurs:", ["Kurs Jual", "Kurs Beli"])
 
