@@ -93,36 +93,127 @@ with tabs[2]:
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
 
-# Tab 4: Model Dummy
+# Tab 4: Model Peramalan Fuzzy
 with tabs[3]:
-    st.subheader("Model Peramalan (Moving Average Dummy)")
-    if st.session_state.get('preprocessed', False):
-        df = st.session_state.df.copy()
-        window = st.slider("Pilih window size (moving average):", 2, 10, 3)
+    st.subheader("Model Peramalan Fuzzy untuk Kurs Jual")
 
-        for col in df.columns:
-            df[f"Prediksi {col}"] = df[col].rolling(window=window).mean()
+    if st.session_state.preprocessed:
+        df_kurs_jual = st.session_state.df_kurs_jual.copy()
 
-        st.session_state.df_prediksi = df
-        st.success("✅ Model dummy berhasil dijalankan!")
-        st.dataframe(df.tail())
+        # --- 1. Tentukan jumlah interval dan buat Fuzzy Set ---
+        jml_interval = st.slider("Jumlah Interval Fuzzy:", 3, 10, 5)
+        min_val = df_kurs_jual["Kurs Jual"].min()
+        max_val = df_kurs_jual["Kurs Jual"].max()
+        interval_width = (max_val - min_val) / jml_interval
+
+        intervals = []
+        fuzzy_sets = []
+        for i in range(jml_interval):
+            low = min_val + i * interval_width
+            high = low + interval_width
+            intervals.append((low, high))
+            fuzzy_sets.append(f"A{i+1}")
+
+        # --- 2. Transformasi Fuzzy ---
+        def fuzzify(value):
+            for idx, (low, high) in enumerate(intervals):
+                if low <= value <= high:
+                    return f"A{idx + 1}"
+            return None
+
+        df_kurs_jual["Fuzzy_Set"] = df_kurs_jual["Kurs Jual"].apply(fuzzify)
+
+        # --- 3. Proses Peramalan Fuzzy ---
+        hasil_list = []
+
+        for i in range(3, len(df_kurs_jual) - 1):
+            E_i = df_kurs_jual['Kurs Jual'].iloc[i - 1]
+            E_i_1 = df_kurs_jual['Kurs Jual'].iloc[i - 2]
+            E_i_2 = df_kurs_jual['Kurs Jual'].iloc[i - 3]
+
+            D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
+
+            # Hitung semua variabel fuzzy
+            X_i = E_i + D_i / 2
+            XX_i = E_i - D_i / 2
+            Y_i = E_i + D_i
+            YY_i = E_i - D_i
+            P_i = E_i + D_i / 4
+            PP_i = E_i - D_i / 4
+            Q_i = E_i + 2 * D_i
+            QQ_i = E_i - 2 * D_i
+            G_i = E_i + D_i / 6
+            GG_i = E_i - D_i / 6
+            H_i = E_i + 3 * D_i
+            HH_i = E_i - 3 * D_i
+
+            values_to_check = [X_i, XX_i, Y_i, YY_i, P_i, PP_i, Q_i, QQ_i, G_i, GG_i, H_i, HH_i]
+            fuzzy_i1 = df_kurs_jual['Fuzzy_Set'].iloc[i]
+
+            if not isinstance(fuzzy_i1, str) or not fuzzy_i1[1:].isdigit():
+                df_kurs_jual.at[i + 1, 'Prediksi'] = None
+                continue
+
+            interval_idx = int(fuzzy_i1[1:]) - 1
+            if interval_idx < 0 or interval_idx >= len(intervals):
+                df_kurs_jual.at[i + 1, 'Prediksi'] = None
+                continue
+
+            low, high = intervals[interval_idx]
+            mid = (low + high) / 2
+            R = 0
+            S = 0
+
+            for val in values_to_check:
+                if low <= val <= high:
+                    R += val
+                    S += 1
+
+            F_j = (R + mid) / (S + 1) if S != 0 else mid
+            df_kurs_jual.at[i + 1, 'Prediksi'] = round(F_j, 2)
+
+            hasil_list.append({
+                'i': i,
+                'Tanggal': df_kurs_jual.index[i],
+                'Aktual': df_kurs_jual['Kurs Jual'].iloc[i],
+                'Prediksi': round(F_j, 2),
+                'Fuzzy_(i)': fuzzy_i1,
+                'Midpoint': mid
+            })
+
+        for j in range(3):
+            hasil_list.insert(j, {
+                'i': j,
+                'Tanggal': df_kurs_jual.index[j],
+                'Aktual': df_kurs_jual['Kurs Jual'].iloc[j],
+                'Prediksi': None,
+                'Fuzzy_(i)': None,
+                'Midpoint': None
+            })
+
+        df_hasil_perhitungan = pd.DataFrame(hasil_list)
+        st.session_state.df_hasil_prediksi = df_hasil_perhitungan
+
+        st.success("✅ Model fuzzy berhasil dijalankan.")
+        st.dataframe(df_hasil_perhitungan[['Tanggal', 'Aktual', 'Prediksi']].dropna())
     else:
-        st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
+        st.warning("Silakan lakukan preprocessing terlebih dahulu.")
+
 
 # Tab 5: Hasil Prediksi
 with tabs[4]:
-    st.subheader("Visualisasi Hasil Prediksi")
-    if st.session_state.get('df_prediksi') is not None:
-        df = st.session_state.df_prediksi
-        kolom = st.selectbox("Pilih kolom kurs:", ["Kurs Jual", "Kurs Beli"])
+    st.subheader("Visualisasi Hasil Prediksi Fuzzy")
+
+    if 'df_hasil_prediksi' in st.session_state:
+        df_hasil = st.session_state.df_hasil_prediksi.dropna()
 
         fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(df.index, df[kolom], label="Asli", color='blue')
-        ax.plot(df.index, df[f"Prediksi {kolom}"], label="Prediksi", linestyle='--', color='orange')
-        ax.set_title(f"Prediksi vs Aktual - {kolom}")
+        ax.plot(df_hasil["Tanggal"], df_hasil["Aktual"], label="Aktual", color='blue')
+        ax.plot(df_hasil["Tanggal"], df_hasil["Prediksi"], label="Prediksi", color='orange', linestyle='--')
+        ax.set_title("Prediksi Kurs Jual vs Aktual")
         ax.set_xlabel("Tanggal")
         ax.set_ylabel("Nilai Kurs")
         ax.legend()
         st.pyplot(fig)
     else:
-        st.warning("Silakan jalankan model terlebih dahulu di tab Model.")
+        st.warning("Belum ada hasil prediksi. Jalankan model terlebih dahulu.")
