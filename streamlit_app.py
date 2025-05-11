@@ -99,6 +99,13 @@ with tabs[3]:
 
     if st.session_state.preprocessed:
         df_kurs_jual = st.session_state.df_kurs_jual.copy()
+
+        # --- 1. Tentukan jumlah interval dan buat Fuzzy Set ---
+        jml_interval = st.slider("Jumlah Interval Fuzzy:", 3, 10, 5)
+        min_val = df_kurs_jual["Kurs Jual"].min()
+        max_val = df_kurs_jual["Kurs Jual"].max()
+        interval_width = (max_val - min_val) / jml_interval
+
         intervals = []
         fuzzy_sets = []
         for i in range(jml_interval):
@@ -119,7 +126,7 @@ with tabs[3]:
         # --- 3. Proses Peramalan Fuzzy ---
         hasil_list = []
 
-        for i in range(3, len(df_kurs_jual) - 1):
+        for i in range(3, len(df_kurs_jual)):
             E_i = df_kurs_jual['Kurs Jual'].iloc[i - 1]
             E_i_1 = df_kurs_jual['Kurs Jual'].iloc[i - 2]
             E_i_2 = df_kurs_jual['Kurs Jual'].iloc[i - 3]
@@ -144,12 +151,12 @@ with tabs[3]:
             fuzzy_i1 = df_kurs_jual['Fuzzy_Set'].iloc[i]
 
             if not isinstance(fuzzy_i1, str) or not fuzzy_i1[1:].isdigit():
-                df_kurs_jual.at[i + 1, 'Prediksi'] = None
+                df_kurs_jual.at[i, 'Prediksi'] = None
                 continue
 
             interval_idx = int(fuzzy_i1[1:]) - 1
             if interval_idx < 0 or interval_idx >= len(intervals):
-                df_kurs_jual.at[i + 1, 'Prediksi'] = None
+                df_kurs_jual.at[i, 'Prediksi'] = None
                 continue
 
             low, high = intervals[interval_idx]
@@ -163,7 +170,7 @@ with tabs[3]:
                     S += 1
 
             F_j = (R + mid) / (S + 1) if S != 0 else mid
-            df_kurs_jual.at[i + 1, 'Prediksi'] = round(F_j, 2)
+            df_kurs_jual.at[i, 'Prediksi'] = round(F_j, 2)
 
             hasil_list.append({
                 'i': i,
@@ -174,6 +181,7 @@ with tabs[3]:
                 'Midpoint': mid
             })
 
+        # Tambahkan 3 baris awal tanpa prediksi
         for j in range(3):
             hasil_list.insert(j, {
                 'i': j,
@@ -184,6 +192,7 @@ with tabs[3]:
                 'Midpoint': None
             })
 
+        # Buat DataFrame hasil perhitungan
         df_hasil_perhitungan = pd.DataFrame(hasil_list)
         st.session_state.df_hasil_prediksi = df_hasil_perhitungan
 
