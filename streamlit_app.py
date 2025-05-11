@@ -94,7 +94,6 @@ with tabs[2]:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
 
 # Tab 4: Model Peramalan Fuzzy
-# Tab 4: Model Peramalan Fuzzy
 with tabs[3]:
     st.subheader("Model Peramalan Fuzzy untuk Kurs Jual")
 
@@ -102,7 +101,7 @@ with tabs[3]:
         df_kurs_jual = st.session_state.df_kurs_jual.copy()
 
         # --- Tetapkan jumlah interval tetap (misalnya 5 interval) ---
-        jml_interval = 5  # Tentukan jumlah interval yang tetap
+        jml_interval = 9  # Tentukan jumlah interval yang tetap
         min_val = df_kurs_jual["Kurs Jual"].min()
         max_val = df_kurs_jual["Kurs Jual"].max()
         interval_width = (max_val - min_val) / jml_interval
