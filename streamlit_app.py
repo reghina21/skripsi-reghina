@@ -17,13 +17,25 @@ tabs = st.tabs(["📁 Dataset", "📈 Visualisasi Dataset", "🧠 Model", "🔮 
 # 1. Dataset Tab
 with tabs[0]:
     st.subheader("Upload Dataset Kurs")
-    uploaded_file = st.file_uploader("Upload file excel dengan kolom: tanggal, beli_yuan, jual_yuan, beli_dollar, jual_dollar", type=["xlsx"])
+    uploaded_file = st.file_uploader(
+        "Upload file Excel dengan kolom: NO, Nilai, Kurs Jual, Kurs Beli, Tanggal",
+        type=["xlsx"]
+    )
 
     if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file, parse_dates=["tanggal"])
-        df.sort_values("tanggal", inplace=True)
-        st.session_state.df = df
-        st.success("✅ Dataset berhasil diupload!")
+        try:
+            df = pd.read_excel(uploaded_file)
+
+            required_columns = {"NO", "Nilai", "Kurs Jual", "Kurs Beli", "Tanggal"}
+            if not required_columns.issubset(df.columns):
+                st.error(f"❌ Kolom tidak lengkap! Harus ada kolom: {', '.join(required_columns)}")
+            else:
+                df["Tanggal"] = pd.to_datetime(df["Tanggal"])
+                df.sort_values("Tanggal", inplace=True)
+                st.session_state.df = df
+                st.success("✅ Dataset berhasil diupload!")
+        except Exception as e:
+            st.error(f"❌ Terjadi kesalahan saat membaca file: {e}")
 
     if st.session_state.df is not None:
         st.write("📄 Data Kurs:")
