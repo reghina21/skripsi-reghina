@@ -88,67 +88,69 @@ with tabs[2]:
     st.subheader("Visualisasi Dataset Terpilih")
     if st.session_state.get('preprocessed', False):
         df = st.session_state.df
-        selected_cols = st.multiselect("Pilih kolom kurs untuk divisualisasikan:", df.columns.tolist(), default=df.columns.tolist())
+        df_kurs_jual = st.session_state.df_kurs_jual
 
-        if selected_cols:
-            fig, ax = plt.subplots(figsize=(12, 5))
-            for col in selected_cols:
-                ax.plot(df.index, df[col], label=col)
-            ax.set_title("Visualisasi Data Kurs")
-            ax.set_xlabel("Tanggal")
-            ax.set_ylabel("Nilai Kurs")
-            ax.legend()
-            st.pyplot(fig)
+        # Dummy function fuzzy_label, silakan sesuaikan
+        def fuzzy_label(value):
+            return "A1"  # placeholder, sesuaikan dengan logika fuzzy Anda
+
+        # Dummy interval, sesuaikan dengan logika fuzzy Anda
+        intervals = [(14000, 14500), (14501, 15000), (15001, 15500)]  # contoh
+
+        st.markdown("### 🔮 Peramalan Kurs Jual ke Depan")
+        n_forecast = st.number_input("Jumlah hari ke depan yang ingin diramal:", 1, 30, 5)
+
+        # Gunakan data terakhir kurs jual sebagai dasar prediksi awal
+        df_hasil = df_kurs_jual.copy()
+        df_hasil.rename(columns={"Kurs Jual": "Prediksi"}, inplace=True)
+        df_hasil.reset_index(inplace=True)
+
+        last_known = df_hasil.dropna().copy().tail(3)
+        future_preds = []
+
+        # Set tanggal awal ramalan
+        start_forecast_date = pd.to_datetime("2025-01-13")
+
+        for i in range(n_forecast):
+            E_i = last_known['Prediksi'].iloc[-1]
+            E_i_1 = last_known['Prediksi'].iloc[-2]
+            E_i_2 = last_known['Prediksi'].iloc[-3]
+            D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
+
+            values = [
+                E_i + D_i / 2, E_i - D_i / 2,
+                E_i + D_i, E_i - D_i,
+                E_i + D_i / 4, E_i - D_i / 4,
+                E_i + 2 * D_i, E_i - 2 * D_i,
+                E_i + D_i / 6, E_i - D_i / 6,
+                E_i + 3 * D_i, E_i - 3 * D_i,
+            ]
+
+            fuzzy = fuzzy_label(E_i)
+            interval_idx = int(fuzzy[1:]) - 1 if fuzzy and fuzzy[1:].isdigit() else -1
+
+            if interval_idx < 0 or interval_idx >= len(intervals):
+                low, high = min(v[0] for v in intervals), max(v[1] for v in intervals)
+            else:
+                low, high = intervals[interval_idx]
+
+            mid = (low + high) / 2
+            R = sum(v for v in values if low <= v <= high)
+            S = sum(1 for v in values if low <= v <= high)
+            pred = round((R + mid) / (S + 1), 2) if S > 0 else round(mid, 2)
+
+            next_date = start_forecast_date + pd.Timedelta(days=i)
+            future_preds.append({"Tanggal": next_date, "Prediksi Kurs Jual": pred})
+
+            last_known = pd.concat([
+                last_known,
+                pd.DataFrame([{"Tanggal": next_date, "Prediksi": pred}])
+            ], ignore_index=True).tail(3)
+
+        df_future = pd.DataFrame(future_preds)
+        st.dataframe(df_future)
+
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
 
-# Prediksi ke depan
-st.markdown("### 🔮 Peramalan Kurs Jual ke Depan")
-n_forecast = st.number_input("Jumlah hari ke depan yang ingin diramal:", 1, 30, 5)
-
-# Ambil data terakhir untuk prediksi ke depan
-last_known = df_hasil.dropna().copy().tail(3)
-future_preds = []
-
-# Set tanggal awal ramalan
-start_forecast_date = pd.to_datetime("2025-01-13")
-
-for i in range(n_forecast):
-    E_i = last_known['Prediksi'].iloc[-1]
-    E_i_1 = last_known['Prediksi'].iloc[-2]
-    E_i_2 = last_known['Prediksi'].iloc[-3]
-    D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
-
-    values = [
-        E_i + D_i / 2, E_i - D_i / 2,
-        E_i + D_i, E_i - D_i,
-        E_i + D_i / 4, E_i - D_i / 4,
-        E_i + 2 * D_i, E_i - 2 * D_i,
-        E_i + D_i / 6, E_i - D_i / 6,
-        E_i + 3 * D_i, E_i - 3 * D_i,
-    ]
-
-    fuzzy = fuzzy_label(E_i)
-    interval_idx = int(fuzzy[1:]) - 1 if fuzzy and fuzzy[1:].isdigit() else -1
-
-    if interval_idx < 0 or interval_idx >= len(intervals):
-        low, high = min(v[0] for v in intervals), max(v[1] for v in intervals)
-    else:
-        low, high = intervals[interval_idx]
-
-    mid = (low + high) / 2
-    R = sum(v for v in values if low <= v <= high)
-    S = sum(1 for v in values if low <= v <= high)
-    pred = round((R + mid) / (S + 1), 2) if S > 0 else round(mid, 2)
-
-    next_date = start_forecast_date + pd.Timedelta(days=i)
-    future_preds.append({"Tanggal": next_date, "Prediksi Kurs Jual": pred})
-
-    last_known = pd.concat([
-        last_known,
-        pd.DataFrame([{"Tanggal": next_date, "Prediksi": pred}])
-    ], ignore_index=True).tail(3)
-
-df_future = pd.DataFrame(future_preds)
-st.dataframe(df_future)
 
