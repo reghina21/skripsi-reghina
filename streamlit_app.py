@@ -5,6 +5,57 @@ import math
 from datetime import timedelta
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
+# 💅 Custom CSS Styling
+st.markdown("""
+    <style>
+    /* Background & font */
+    body, .stApp {
+        background-color: #fceef5;
+        color: #333333;
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Header color */
+    .st-emotion-cache-1v0mbdj {
+        background-color: #fde2ff !important;
+        padding: 1rem;
+        border-radius: 10px;
+        color: #4d4d4d;
+    }
+
+    /* Tabs styling */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #ffe5ec;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        font-weight: bold;
+        color: #cc6699;
+    }
+
+    /* Watermark */
+    .watermark {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-size: 12px;
+        color: #ffb6c1;
+        opacity: 0.6;
+        z-index: 9999;
+    }
+
+    /* Table and data style */
+    .stDataFrame {
+        background-color: #fff0f5;
+        border-radius: 5px;
+    }
+    </style>
+
+    <div class="watermark">© Reghina Ajeng Santika</div>
+""", unsafe_allow_html=True)
+
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 
 # Navigasi atas dengan tabs
