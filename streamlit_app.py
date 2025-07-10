@@ -404,7 +404,13 @@ with tabs[4]:
             F_j = (R + mid) / (S + 1) if S > 0 else mid
             F_j = round(F_j, 2)
 
-            fuzzy_new = fuzzy_label(F_j)
+            def fuzzy_label(value, intervals):
+                for i, (low, high) in enumerate(intervals):
+                    if low <= value <= high:
+                        return f"A{i+1}"
+                return None
+
+            fuzzy_new = fuzzy_label(F_j, intervals)
 
             prediksi_ke_depan.append({
                 'Tanggal': future_dates[step],
