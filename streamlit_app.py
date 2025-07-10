@@ -10,7 +10,7 @@ tabs = st.tabs([
     "🏠 Home",
     "📁 Dataset",
     "🧹 Preprocessing",
-    "📊 Visualisasi",
+    "📊 Hasil Prediksi",
     "⏭️ Prediksi Masa Depan"
 ])
 
@@ -100,7 +100,7 @@ with tabs[2]:
 
 # Tab 3: Visualisasi Dataset
 with tabs[3]:
-    st.subheader("Visualisasi Dataset")
+    st.subheader("Hasil Prediksi")
     if st.session_state.get('preprocessed', False):
         df = st.session_state.df
         st.line_chart(df)
