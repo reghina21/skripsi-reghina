@@ -8,19 +8,17 @@ st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs")
 st.markdown("""
     <style>
-    /* Background & font */
     body, .stApp {
-        background-color: #FFF8DC;
+        background-color: #fceef5;
         color: #333333;
         font-family: 'Arial', sans-serif;
     }
 
     h1 {
-        color: #d63384 !important;  /* Judul dashboard: Pink tua */
+        color: #d63384 !important;
         font-weight: bold !important;
     }
 
-    /* Header block */
     .st-emotion-cache-1v0mbdj {
         background-color: #fde2ff !important;
         padding: 1rem;
@@ -28,7 +26,6 @@ st.markdown("""
         color: #4d4d4d;
     }
 
-    /* Tabs styling */
     .stTabs [data-baseweb="tab-list"] {
         background-color: #ffe5ec;
         border-radius: 10px;
@@ -37,10 +34,18 @@ st.markdown("""
 
     .stTabs [data-baseweb="tab"] {
         font-weight: bold;
-        color: #d63384 !important; /* 🌸 Pink tua */
+        color: #d63384 !important;
     }
 
-    /* Watermark kiri bawah */
+    /* Warning message styling */
+    div[data-testid="stNotificationContentWarning"] {
+        color: #a61e4d !important;
+        background-color: #fff0f5 !important;
+        font-weight: bold;
+        border: 1px solid #f5c2d7;
+        border-radius: 8px;
+    }
+
     .watermark {
         position: fixed;
         bottom: 10px;
@@ -52,7 +57,6 @@ st.markdown("""
         font-style: italic;
     }
 
-    /* Table background */
     .stDataFrame {
         background-color: #fff0f5;
         border-radius: 5px;
@@ -61,6 +65,7 @@ st.markdown("""
 
     <div class="watermark">© Reghina Ajeng Santika</div>
 """, unsafe_allow_html=True)
+
 
 
 # Navigasi atas dengan tabs
