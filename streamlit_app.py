@@ -6,6 +6,36 @@ import math
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 
+# CSS untuk tema pastel yang colorful
+st.markdown("""
+    <style>
+        body {
+            background-color: #fef6e4;
+            color: #001858;
+        }
+        .stApp {
+            background-color: #fef6e4;
+        }
+        .css-18e3th9 {
+            background-color: #fef6e4 !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            background-color: #f3d2c1;
+            color: #001858;
+            border-radius: 10px 10px 0 0;
+            padding: 10px;
+            margin-right: 5px;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background-color: #ffdac6;
+        }
+        .stTabs [aria-selected="true"] {
+            background-color: #8bd3dd;
+            color: black;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Navigasi atas dengan tabs
 tabs = st.tabs([
     "🏠 Home",
