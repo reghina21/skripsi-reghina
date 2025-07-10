@@ -11,7 +11,7 @@ st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 tabs = st.tabs([
     "🏠 Home",
     "📁 Dataset",
-    "🩵 Preprocessing",
+    "🧹 Preprocessing",
     "📈 Prediksi Kurs Jual",
     "📉 Prediksi Kurs Beli"
 ])
@@ -76,7 +76,7 @@ with tabs[2]:
 
         st.success("✅ Data berhasil diproses!")
 
-        st.markdown("### 📉 Kurs Jual")
+        st.markdown("### 💹 Kurs Jual")
         st.dataframe(df_kurs_jual.tail())
 
         fig1, ax1 = plt.subplots(figsize=(12, 4))
@@ -197,81 +197,6 @@ with tabs[4]:
         plt.xticks(rotation=45)
         plt.tight_layout()
         st.pyplot(fig)
-
-        # Prediksi 5 Periode ke Depan
-        def ambil_nilai_terakhir(df, n=3):
-            hasil = []
-            rows = df.iloc[-n:]
-            for idx, row in rows.iterrows():
-                val = row['Kurs Beli'] if pd.notnull(row['Kurs Beli']) else row['Prediksi']
-                hasil.append(val)
-            return hasil
-
-        gabungan_data = df_kurs_beli[['Kurs Beli', 'Fuzzy Set', 'Prediksi']].copy()
-        data_awal = gabungan_data[gabungan_data['Prediksi'].notnull()].iloc[-3:].copy()
-
-        n_prediksi = 5
-        future_dates = pd.date_range(start=df_kurs_beli.index.max() + timedelta(days=1), periods=5)
-
-        prediksi_ke_depan = []
-
-        for step in range(n_prediksi):
-            nilai_terakhir = ambil_nilai_terakhir(data_awal, 3)
-            E_i_2, E_i_1, E_i = nilai_terakhir
-
-            D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
-
-            values_to_check = [
-                E_i + D_i / 2, E_i - D_i / 2,
-                E_i + D_i, E_i - D_i,
-                E_i + D_i / 4, E_i - D_i / 4,
-                E_i + 2 * D_i, E_i - 2 * D_i,
-                E_i + D_i / 6, E_i - D_i / 6,
-                E_i + 3 * D_i, E_i - 3 * D_i,
-            ]
-
-            fuzzy_i1 = data_awal['Fuzzy Set'].iloc[-1]
-            interval_idx = int(fuzzy_i1[1:]) - 1 if isinstance(fuzzy_i1, str) and fuzzy_i1[1:].isdigit() else None
-
-            if interval_idx is None or interval_idx < 0 or interval_idx >= len(intervals):
-                low, high = min(v[0] for v in intervals), max(v[1] for v in intervals)
-            else:
-                low, high = intervals[interval_idx]
-
-            mid = (low + high) / 2
-            R = sum(val for val in values_to_check if low <= val <= high)
-            S = sum(1 for val in values_to_check if low <= val <= high)
-
-            F_j = (R + mid) / (S + 1) if S > 0 else mid
-            F_j = round(F_j, 2)
-            fuzzy_new = fuzzy_label(F_j)
-
-            prediksi_ke_depan.append({
-                'Tanggal': future_dates[step],
-                'Prediksi': F_j
-            })
-
-            row_baru = pd.DataFrame([{
-                'Kurs Beli': None,
-                'Fuzzy Set': fuzzy_new,
-                'Prediksi': F_j
-            }], index=[future_dates[step]])
-
-            data_awal = pd.concat([data_awal, row_baru], ignore_index=False)
-
-        df_prediksi_5 = pd.DataFrame(prediksi_ke_depan)
-
-        st.markdown("### 🕒 Prediksi Kurs Beli 5 Periode ke Depan")
-        st.dataframe(df_prediksi_5)
-
-        fig_future, ax_future = plt.subplots(figsize=(10, 4))
-        ax_future.plot(df_prediksi_5['Tanggal'], df_prediksi_5['Prediksi'], marker='o', color='orange')
-        ax_future.set_title("Prediksi Kurs Beli di Masa Depan")
-        ax_future.set_xlabel("Tanggal")
-        ax_future.set_ylabel("Nilai Prediksi")
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        st.pyplot(fig_future)
 
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
