@@ -229,7 +229,11 @@ with tabs[4]:
         R = Dmax - Dmin
         I = R / K
 
-        intervals = [(Dmin + i * I, Dmin + (i + 1) * I) for i in range(K)]
+        intervals = []
+        for i in range(K):
+            lower = Dmin - D1 + i * I
+            upper = lower + I
+            intervals.append((lower, upper))
 
         # Fungsi fuzzy label
         def fuzzy_label(val, intervals):
