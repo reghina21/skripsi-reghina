@@ -253,7 +253,7 @@ with tabs[4]:
         last_known = df_hasil.dropna().copy().tail(3)
         future_preds = []
 
-        start_forecast_date = df_hasil["Tanggal"].max() + pd.Timedelta(days=1)
+        start_forecast_date = pd.to_datetime("2025-01-13")
 
         for i in range(n_forecast):
             E_i = last_known['Prediksi'].iloc[-1]
