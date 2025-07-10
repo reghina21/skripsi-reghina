@@ -273,7 +273,7 @@ with tabs[4]:
             df_kurs.at[df_kurs.index[i], "Prediksi"] = pred
 
         # Siapkan data awal untuk prediksi ke depan
-        df_pred_awal = df_kurs[["Fuzzy Set", "Aktual"]].dropna().copy().iloc[-3:].copy()
+        df_pred_awal = df_kurs[["Fuzzy Set", "Prediksi"]].dropna().copy().iloc[-3:].copy()
 
         # Input jumlah hari
         n_forecast = st.number_input("Jumlah hari ke depan:", min_value=1, max_value=30, value=5)
@@ -298,7 +298,7 @@ with tabs[4]:
             ]
 
             fuzzy_i1 = df_pred_awal['Fuzzy Set'].iloc[-1]
-            interval_idx = int(fuzzy_i1[1:]) - 1 if isinstance(fuzzy_i1, str) and fuzzy_i1[1:].isdigit() else -1
+            interval_idx = int(fuzzy_i1[1:]) - 1 if isinstance(fuzzy_i1, str) and fuzzy_i1[1:].isdigit() else None
 
             if 0 <= interval_idx < len(intervals):
                 low, high = intervals[interval_idx]
