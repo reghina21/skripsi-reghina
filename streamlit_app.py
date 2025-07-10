@@ -212,93 +212,99 @@ with tabs[3]:
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
 
-# Tab 4: Prediksi Masa Depan
-with tabs[4]:
-    st.subheader("🔮 Prediksi Kurs ke Depan")
-    
-    if st.session_state.get('preprocessed', False):
-        # Pilihan jenis kurs
-        tipe_kurs = st.selectbox("Pilih jenis kurs yang ingin diramal ke depan:", ["Kurs Jual", "Kurs Beli"], key="pilih_kurs_forecast")
-        
-        df_kurs = st.session_state.df_kurs_jual if tipe_kurs == "Kurs Jual" else st.session_state.df_kurs_beli
-        kolom_kurs = "Kurs Jual" if tipe_kurs == "Kurs Jual" else "Kurs Beli"
+from datetime import timedelta
+import pandas as pd
 
-        # Hitung interval seperti sebelumnya
-        n = len(df_kurs)
-        K = round(1 + 3.322 * math.log10(n))
-        Dmax = df_kurs[kolom_kurs].max()
-        Dmin = df_kurs[kolom_kurs].min()
-        R = Dmax - Dmin
-        I = R / K
+# Fungsi untuk menentukan fuzzy label berdasarkan interval
+def fuzzy_label(value, intervals):
+    for i, (low, high) in enumerate(intervals):
+        if low <= value <= high:
+            return f"A{i+1}"
+    return None
 
-        intervals = []
-        for i in range(K):
-            lower = Dmin + i * I
-            upper = lower + I
-            intervals.append((lower, upper))
+# 🔧 Fungsi bantu: Ambil 3 nilai terakhir (gabungan Kurs Beli dan Prediksi)
+def ambil_nilai_terakhir(df, n=3):
+    hasil = []
+    sumber = []
+    rows = df.iloc[-n:]
+    for idx, row in rows.iterrows():
+        val = row['Kurs Beli'] if pd.notnull(row['Kurs Beli']) else row['Prediksi']
+        sumber.append('Aktual' if pd.notnull(row['Kurs Beli']) else 'Prediksi')
+        hasil.append(val)
+    return hasil, sumber
 
-        # Fungsi fuzzy label
-        def fuzzy_label(val):
-            for idx, (low, high) in enumerate(intervals):
-                if low <= val <= high:
-                    return f"A{idx + 1}"
-            return None
+# 🔁 Prediksi 5 Periode ke Depan
+gabungan_data = df_kurs_beli[['Kurs Beli', 'Fuzzy Set', 'Prediksi']].copy()
+data_awal = gabungan_data[gabungan_data['Prediksi'].notnull()].iloc[-3:].copy()
 
-        n_forecast = st.number_input("Jumlah hari ke depan yang ingin diramal:", 1, 30, 5)
+n_prediksi = 5
+future_dates = pd.date_range(start='2025-01-13', periods=5)
 
-        df_hasil = df_kurs.copy()
-        df_hasil.rename(columns={kolom_kurs: "Prediksi"}, inplace=True)
-        df_hasil.reset_index(inplace=True)
 
-        last_known = df_hasil.dropna().copy().tail(3)
-        future_preds = []
+prediksi_ke_depan = []
 
-        start_forecast_date = pd.to_datetime("2025-01-13")
+for step in range(n_prediksi):
+    # Ambil E(i), E(i-1) E(i-2)
+    nilai_terakhir, sumber = ambil_nilai_terakhir(data_awal, 3)
+    E_i_2, E_i_1, E_i = nilai_terakhir
 
-        for i in range(n_forecast):
-            E_i = last_known['Prediksi'].iloc[-1]
-            E_i_1 = last_known['Prediksi'].iloc[-2]
-            E_i_2 = last_known['Prediksi'].iloc[-3]
-            D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
+    D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
 
-            values = [
-                E_i + D_i / 2, E_i - D_i / 2,
-                E_i + D_i, E_i - D_i,
-                E_i + D_i / 4, E_i - D_i / 4,
-                E_i + 2 * D_i, E_i - 2 * D_i,
-                E_i + D_i / 6, E_i - D_i / 6,
-                E_i + 3 * D_i, E_i - 3 * D_i,
-            ]
+    values_to_check = [
+        E_i + D_i / 2, E_i - D_i / 2,
+        E_i + D_i, E_i - D_i,
+        E_i + D_i / 4, E_i - D_i / 4,
+        E_i + 2 * D_i, E_i - 2 * D_i,
+        E_i + D_i / 6, E_i - D_i / 6,
+        E_i + 3 * D_i, E_i - 3 * D_i,
+    ]
 
-            fuzzy = fuzzy_label(E_i)
-            interval_idx = int(fuzzy[1:]) - 1 if fuzzy and fuzzy[1:].isdigit() else -1
+    # Gunakan fuzzy label dari baris terakhir
+    fuzzy_i1 = data_awal['Fuzzy Set'].iloc[-1]
+    interval_idx = int(fuzzy_i1[1:]) - 1 if isinstance(fuzzy_i1, str) and fuzzy_i1[1:].isdigit() else None
 
-            if interval_idx < 0 or interval_idx >= len(intervals):
-                low, high = Dmin, Dmax
-            else:
-                low, high = intervals[interval_idx]
-
-            mid = (low + high) / 2
-            R_sum = sum(v for v in values if low <= v <= high)
-            S = sum(1 for v in values if low <= v <= high)
-            pred = round((R_sum + mid) / (S + 1), 2) if S > 0 else round(mid, 2)
-
-            next_date = start_forecast_date + pd.Timedelta(days=i)
-            future_preds.append({"Tanggal": next_date, f"Prediksi {tipe_kurs}": pred})
-
-            last_known = pd.concat([
-                last_known,
-                pd.DataFrame([{"Tanggal": next_date, "Prediksi": pred}])
-            ], ignore_index=True).tail(3)
-
-        df_future = pd.DataFrame(future_preds)
-
-        st.markdown(f"### 🔮 Tabel Prediksi {tipe_kurs} {n_forecast} Hari ke Depan")
-        st.dataframe(df_future)
-
-        st.markdown(f"### 📈 Grafik Prediksi {tipe_kurs}")
-        st.line_chart(df_future.set_index("Tanggal"))
-
+    if interval_idx is None or interval_idx < 0 or interval_idx >= len(intervals):
+        low, high = min(v[0] for v in intervals), max(v[1] for v in intervals)
     else:
-        st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
+        low, high = intervals[interval_idx]
+
+    mid = (low + high) / 2
+    R = sum(val for val in values_to_check if low <= val <= high)
+    S = sum(1 for val in values_to_check if low <= val <= high)
+
+    F_j = (R + mid) / (S + 1) if S > 0 else mid
+    F_j = round(F_j, 2)
+    fuzzy_new = fuzzy_label(F_j, intervals)
+
+    # Simpan prediksi
+    prediksi_ke_depan.append({
+        'Tanggal': future_dates[step],
+        'Prediksi': F_j
+    })
+
+    # Tambahkan ke data_awal
+    row_baru = pd.DataFrame([{
+        'Kurs Beli': None,
+        'Fuzzy Set': fuzzy_new,
+        'Prediksi': F_j
+    }], index=[future_dates[step]])
+
+    data_awal = pd.concat([data_awal, row_baru], ignore_index=False)
+
+# 🚀 Tampilkan hasil akhir
+df_prediksi_5 = pd.DataFrame(prediksi_ke_depan)
+print("📊 Prediksi 5 Periode ke Depan (dengan fluktuasi):")
+print(df_prediksi_5)
+
+# 📈 Visualisasi (opsional)
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 4))
+plt.plot(df_prediksi_5['Tanggal'], df_prediksi_5['Prediksi'], marker='o', color='blue')
+plt.title('Prediksi 5 Periode Kedepan')
+plt.xlabel('Tanggal')
+plt.ylabel('Kurs Prediksi')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 
