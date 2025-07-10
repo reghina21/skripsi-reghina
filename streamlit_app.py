@@ -402,7 +402,7 @@ with tabs[4]:
             S = sum(1 for val in values_to_check if low <= val <= high)
 
             F_j = (R + mid) / (S + 1) if S > 0 else mid
-            F_j = round(F_j, 2)
+            F_j = round(F_j, 3)
 
             def fuzzy_label(value, intervals):
                 for i, (low, high) in enumerate(intervals):
