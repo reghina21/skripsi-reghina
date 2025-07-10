@@ -6,22 +6,24 @@ import math
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 
-# CSS untuk tema pastel yang colorful
+# CSS untuk tema pastel yang colorful dan teks pink tua
 st.markdown("""
     <style>
         body {
             background-color: #fef6e4;
-            color: #001858;
+            color: #9b2c8d; /* Pink tua */
         }
         .stApp {
             background-color: #fef6e4;
+            color: #9b2c8d; /* Pink tua */
         }
         .css-18e3th9 {
             background-color: #fef6e4 !important;
+            color: #9b2c8d !important; /* Pink tua */
         }
         .stTabs [data-baseweb="tab"] {
             background-color: #f3d2c1;
-            color: #001858;
+            color: #9b2c8d;
             border-radius: 10px 10px 0 0;
             padding: 10px;
             margin-right: 5px;
@@ -31,7 +33,7 @@ st.markdown("""
         }
         .stTabs [aria-selected="true"] {
             background-color: #8bd3dd;
-            color: black;
+            color: #9b2c8d;
         }
     </style>
 """, unsafe_allow_html=True)
