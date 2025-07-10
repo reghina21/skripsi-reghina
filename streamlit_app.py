@@ -273,7 +273,7 @@ with tabs[4]:
             df_kurs.at[df_kurs.index[i], "Prediksi"] = pred
 
         # Siapkan data awal untuk prediksi ke depan
-        df_pred_awal = df_kurs[[ "Prediksi"]].dropna().copy().iloc[-3:].copy()
+        df_pred_awal = df_kurs[["Fuzzy Set", "Aktual"]].dropna().copy().iloc[-3:].copy()
 
         # Input jumlah hari
         n_forecast = st.number_input("Jumlah hari ke depan:", min_value=1, max_value=30, value=5)
