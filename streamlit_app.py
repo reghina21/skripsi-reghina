@@ -6,18 +6,18 @@ from datetime import timedelta
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs")
-# 💅 Custom CSS Styling dengan pink tua dan biru pastel
 st.markdown("""
     <style>
-    h1 {
-    color: #d63384 !important;  /* Pink tua */
-    font-weight: bold !important;
-}
     /* Background & font */
     body, .stApp {
         background-color: #fceef5;
         color: #333333;
         font-family: 'Arial', sans-serif;
+    }
+
+    h1 {
+        color: #d63384 !important;  /* Judul dashboard: Pink tua */
+        font-weight: bold !important;
     }
 
     /* Header block */
@@ -44,7 +44,7 @@ st.markdown("""
     .watermark {
         position: fixed;
         bottom: 10px;
-        left: 10px; /* <-- posisinya di kiri */
+        left: 10px;
         font-size: 13px;
         color: #d63384;
         opacity: 0.7;
@@ -61,7 +61,6 @@ st.markdown("""
 
     <div class="watermark">© Reghina Ajeng Santika</div>
 """, unsafe_allow_html=True)
-
 
 
 # Navigasi atas dengan tabs
