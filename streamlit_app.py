@@ -355,7 +355,9 @@ with tabs[4]:
         plt.tight_layout()
         st.pyplot(fig)
 
-        # Prediksi 5 Periode ke Depan
+         # Prediksi Masa Depan
+        st.markdown("### 🔮 Prediksi Masa Depan")
+
         def ambil_nilai_terakhir(df, n=3):
             hasil = []
             rows = df.iloc[-n:]
@@ -368,7 +370,7 @@ with tabs[4]:
         data_awal = gabungan_data[gabungan_data['Prediksi'].notnull()].iloc[-3:].copy()
 
         n_prediksi = 5
-        future_dates = pd.date_range(start=df_kurs_beli.index.max() + timedelta(days=1), periods=5)
+        future_dates = pd.date_range(start='2025-01-13', periods=n_prediksi)
 
         prediksi_ke_depan = []
 
@@ -384,7 +386,7 @@ with tabs[4]:
                 E_i + D_i / 4, E_i - D_i / 4,
                 E_i + 2 * D_i, E_i - 2 * D_i,
                 E_i + D_i / 6, E_i - D_i / 6,
-                E_i + 3 * D_i, E_i - 3 * D_i,
+                E_i + 3 * D_i, E_i - 3 * D_i
             ]
 
             fuzzy_i1 = data_awal['Fuzzy Set'].iloc[-1]
@@ -401,7 +403,8 @@ with tabs[4]:
 
             F_j = (R + mid) / (S + 1) if S > 0 else mid
             F_j = round(F_j, 2)
-            fuzzy_new = fuzzy_label(F_j)
+
+            fuzzy_new = fuzzy_label(F_j, intervals)
 
             prediksi_ke_depan.append({
                 'Tanggal': future_dates[step],
@@ -414,14 +417,10 @@ with tabs[4]:
                 'Prediksi': F_j
             }], index=[future_dates[step]])
 
-            data_awal = pd.concat([data_awal, row_baru], ignore_index=False)
+            data_awal = pd.concat([data_awal, row_baru])
 
         df_prediksi_5 = pd.DataFrame(prediksi_ke_depan)
-
-        st.markdown("### 🕒 Prediksi Kurs Beli 5 Periode ke Depan")
         st.dataframe(df_prediksi_5)
-        
+
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
-
-
