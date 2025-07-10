@@ -5,9 +5,14 @@ import math
 from datetime import timedelta
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
+st.title("📊 Dashboard Peramalan Kurs")
 # 💅 Custom CSS Styling dengan pink tua dan biru pastel
 st.markdown("""
     <style>
+    h1 {
+    color: #d63384 !important;  /* Pink tua */
+    font-weight: bold !important;
+}
     /* Background & font */
     body, .stApp {
         background-color: #fceef5;
