@@ -35,11 +35,11 @@ st.markdown("""
         color: #d63384 !important; /* 🌸 Pink tua */
     }
 
-    /* Watermark */
+    /* Watermark kiri bawah */
     .watermark {
         position: fixed;
         bottom: 10px;
-        right: 10px;
+        left: 10px; /* <-- posisinya di kiri */
         font-size: 13px;
         color: #d63384;
         opacity: 0.7;
@@ -47,7 +47,7 @@ st.markdown("""
         font-style: italic;
     }
 
-    /* Table and data style */
+    /* Table background */
     .stDataFrame {
         background-color: #fff0f5;
         border-radius: 5px;
@@ -56,6 +56,7 @@ st.markdown("""
 
     <div class="watermark">© Reghina Ajeng Santika</div>
 """, unsafe_allow_html=True)
+
 
 
 # Navigasi atas dengan tabs
