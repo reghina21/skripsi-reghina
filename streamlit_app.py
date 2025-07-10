@@ -101,99 +101,134 @@ with tabs[2]:
 
 # Tab 3: Hasil Prediksi
 with tabs[3]:
-    st.subheader("📊 Hasil Prediksi Kurs Beli dengan Interval Fuzzy")
+    st.subheader("📊 Hasil Prediksi Kurs Beli & Jual")
 
     if st.session_state.get('preprocessed', False):
         df_kurs_beli = st.session_state.df_kurs_beli.copy()
+        df_kurs_jual = st.session_state.df_kurs_jual.copy()
 
-        # Hitung jumlah kelas dengan Aturan Sturges
+        # Hitung interval fuzzy (Sturges)
         n = len(df_kurs_beli)
-        K = 1 + 3.322 * math.log10(n)
-        K = round(K)
+        K = round(1 + 3.322 * math.log10(n))
 
-        Dmax = df_kurs_beli['Kurs Beli'].max()
-        Dmin = df_kurs_beli['Kurs Beli'].min()
-        D1 = 0  # Nilai penyesuaian bawah
-        D2 = 0  # Nilai penyesuaian atas
-
+        Dmax = max(df_kurs_beli['Kurs Beli'].max(), df_kurs_jual['Kurs Jual'].max())
+        Dmin = min(df_kurs_beli['Kurs Beli'].min(), df_kurs_jual['Kurs Jual'].min())
+        D1, D2 = 5, 5
         R = (Dmax + D2) - (Dmin - D1)
-        I = R / K  # Lebar interval
+        I = R / K
 
         intervals = []
-        midpoints = []
         for i in range(K):
             lower = Dmin - D1 + i * I
             upper = lower + I
-            midpoint = (lower + upper) / 2
             intervals.append((lower, upper))
-            midpoints.append(midpoint)
 
-        # Fuzzifikasi nilai Kurs Beli
+        # Fungsi Fuzzy Label
         def fuzzy_label(value):
             for idx, (low, high) in enumerate(intervals):
                 if low <= value <= high:
                     return f"A{idx + 1}"
             return None
 
-        df_kurs_beli['Fuzzy Set'] = df_kurs_beli['Kurs Beli'].apply(fuzzy_label)
+        df_kurs_beli['Fuzzy_Set'] = df_kurs_beli['Kurs Beli'].apply(fuzzy_label)
+        df_kurs_jual['Fuzzy_Set'] = df_kurs_jual['Kurs Jual'].apply(fuzzy_label)
 
-        hasil_list = []
-
+        # ================== Prediksi Kurs Beli ==================
+        hasil_beli = []
         for i in range(3, len(df_kurs_beli)):
             E_i = df_kurs_beli['Kurs Beli'].iloc[i - 1]
             E_i_1 = df_kurs_beli['Kurs Beli'].iloc[i - 2]
             E_i_2 = df_kurs_beli['Kurs Beli'].iloc[i - 3]
-
             D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
+            values = [E_i + D_i / 2, E_i - D_i / 2,
+                      E_i + D_i, E_i - D_i,
+                      E_i + D_i / 4, E_i - D_i / 4,
+                      E_i + 2 * D_i, E_i - 2 * D_i,
+                      E_i + D_i / 6, E_i - D_i / 6,
+                      E_i + 3 * D_i, E_i - 3 * D_i]
 
-            values_to_check = [
-                E_i + D_i / 2, E_i - D_i / 2,
-                E_i + D_i, E_i - D_i,
-                E_i + D_i / 4, E_i - D_i / 4,
-                E_i + 2 * D_i, E_i - 2 * D_i,
-                E_i + D_i / 6, E_i - D_i / 6,
-                E_i + 3 * D_i, E_i - 3 * D_i,
-            ]
+            fuzzy_i = df_kurs_beli['Fuzzy_Set'].iloc[i]
+            idx = int(fuzzy_i[1:]) - 1 if fuzzy_i and fuzzy_i[1:].isdigit() else -1
 
-            fuzzy_i1 = df_kurs_beli['Fuzzy Set'].iloc[i]
-            interval_idx = int(fuzzy_i1[1:]) - 1 if fuzzy_i1 and fuzzy_i1[1:].isdigit() else -1
-
-            if interval_idx < 0 or interval_idx >= len(intervals):
+            if 0 <= idx < len(intervals):
+                low, high = intervals[idx]
+                mid = (low + high) / 2
+                R = sum(val for val in values if low <= val <= high)
+                S = sum(1 for val in values if low <= val <= high)
+                pred = (R + mid) / (S + 1) if S > 0 else mid
+                df_kurs_beli.at[i, 'Prediksi'] = round(pred, 2)
+            else:
                 df_kurs_beli.at[i, 'Prediksi'] = None
-                continue
 
-            low, high = intervals[interval_idx]
-            mid = (low + high) / 2
-
-            R_sum = sum(val for val in values_to_check if low <= val <= high)
-            S = sum(1 for val in values_to_check if low <= val <= high)
-
-            F_j = (R_sum + mid) / (S + 1) if S > 0 else mid
-            df_kurs_beli.at[i, 'Prediksi'] = round(F_j, 2)
-
-            hasil_list.append({
-                'i': i,
+            hasil_beli.append({
                 'Tanggal': df_kurs_beli.index[i],
                 'Aktual': df_kurs_beli['Kurs Beli'].iloc[i],
-                'Prediksi': round(F_j, 2)
+                'Prediksi': df_kurs_beli['Prediksi'].iloc[i]
             })
 
-        # Tambahkan 3 baris awal tanpa prediksi
         for j in range(3):
-            hasil_list.insert(j, {
-                'i': j,
+            hasil_beli.insert(j, {
                 'Tanggal': df_kurs_beli.index[j],
                 'Aktual': df_kurs_beli['Kurs Beli'].iloc[j],
                 'Prediksi': None
             })
 
-        df_hasil_perhitungan_beli = pd.DataFrame(hasil_list)
+        df_hasil_beli = pd.DataFrame(hasil_beli)
 
-        st.markdown("### 🔍 Tabel Hasil Prediksi Kurs Beli")
-        st.dataframe(df_hasil_perhitungan_beli[['Tanggal', 'Aktual', 'Prediksi']])
+        # ================== Prediksi Kurs Jual ==================
+        hasil_jual = []
+        for i in range(3, len(df_kurs_jual)):
+            E_i = df_kurs_jual['Kurs Jual'].iloc[i - 1]
+            E_i_1 = df_kurs_jual['Kurs Jual'].iloc[i - 2]
+            E_i_2 = df_kurs_jual['Kurs Jual'].iloc[i - 3]
+            D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
+            values = [E_i + D_i / 2, E_i - D_i / 2,
+                      E_i + D_i, E_i - D_i,
+                      E_i + D_i / 4, E_i - D_i / 4,
+                      E_i + 2 * D_i, E_i - 2 * D_i,
+                      E_i + D_i / 6, E_i - D_i / 6,
+                      E_i + 3 * D_i, E_i - 3 * D_i]
 
-        st.markdown("### 📈 Grafik Aktual vs Prediksi Kurs Beli")
-        st.line_chart(df_hasil_perhitungan_beli.set_index("Tanggal")[["Aktual", "Prediksi"]])
+            fuzzy_i = df_kurs_jual['Fuzzy_Set'].iloc[i]
+            idx = int(fuzzy_i[1:]) - 1 if fuzzy_i and fuzzy_i[1:].isdigit() else -1
+
+            if 0 <= idx < len(intervals):
+                low, high = intervals[idx]
+                mid = (low + high) / 2
+                R = sum(val for val in values if low <= val <= high)
+                S = sum(1 for val in values if low <= val <= high)
+                pred = (R + mid) / (S + 1) if S > 0 else mid
+                df_kurs_jual.at[i, 'Prediksi'] = round(pred, 2)
+            else:
+                df_kurs_jual.at[i, 'Prediksi'] = None
+
+            hasil_jual.append({
+                'Tanggal': df_kurs_jual.index[i],
+                'Aktual': df_kurs_jual['Kurs Jual'].iloc[i],
+                'Prediksi': df_kurs_jual['Prediksi'].iloc[i]
+            })
+
+        for j in range(3):
+            hasil_jual.insert(j, {
+                'Tanggal': df_kurs_jual.index[j],
+                'Aktual': df_kurs_jual['Kurs Jual'].iloc[j],
+                'Prediksi': None
+            })
+
+        df_hasil_jual = pd.DataFrame(hasil_jual)
+
+        # ================== Tampilkan Hasil ==================
+        st.markdown("### 💰 Tabel Prediksi Kurs Beli")
+        st.dataframe(df_hasil_beli)
+
+        st.markdown("### 💹 Grafik Kurs Beli")
+        st.line_chart(df_hasil_beli.set_index("Tanggal")[["Aktual", "Prediksi"]])
+
+        st.markdown("### 💵 Tabel Prediksi Kurs Jual")
+        st.dataframe(df_hasil_jual)
+
+        st.markdown("### 📈 Grafik Kurs Jual")
+        st.line_chart(df_hasil_jual.set_index("Tanggal")[["Aktual", "Prediksi"]])
 
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
