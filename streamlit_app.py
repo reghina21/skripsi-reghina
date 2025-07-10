@@ -101,40 +101,36 @@ with tabs[2]:
 
 # Tab 3: Hasil Prediksi
 with tabs[3]:
-    st.subheader("📊 Hasil Prediksi dengan Interval Fuzzy")
+    st.subheader("📊 Hasil Prediksi Kurs dengan Interval Fuzzy")
 
     if st.session_state.get('preprocessed', False):
-        # Pilihan kurs
-        tipe_kurs = st.selectbox("Pilih jenis kurs yang ingin diprediksi:", ["Kurs Beli", "Kurs Jual"])
+        # Dropdown pemilihan jenis kurs
+        tipe_kurs = st.selectbox("Pilih jenis kurs yang ingin diprediksi:", ["Kurs Jual", "Kurs Beli"])
 
-        # Ambil dataframe sesuai pilihan
-        if tipe_kurs == "Kurs Beli":
-            df_kurs = st.session_state.df_kurs_beli.copy()
-            kolom_kurs = "Kurs Beli"
-        else:
+        if tipe_kurs == "Kurs Jual":
             df_kurs = st.session_state.df_kurs_jual.copy()
             kolom_kurs = "Kurs Jual"
+        else:
+            df_kurs = st.session_state.df_kurs_beli.copy()
+            kolom_kurs = "Kurs Beli"
 
         # Hitung jumlah kelas dengan Aturan Sturges
         n = len(df_kurs)
-        K = 1 + 3.322 * math.log10(n)
-        K = round(K)
+        K = round(1 + 3.322 * math.log10(n))
 
         Dmax = df_kurs[kolom_kurs].max()
         Dmin = df_kurs[kolom_kurs].min()
-        D1, D2 = 0, 0
+        D1, D2 = 0, 0  # Penyesuaian bawah dan atas
 
         R = (Dmax + D2) - (Dmin - D1)
         I = R / K
 
+        # Buat interval fuzzy
         intervals = []
-        midpoints = []
         for i in range(K):
             lower = Dmin - D1 + i * I
             upper = lower + I
-            midpoint = (lower + upper) / 2
             intervals.append((lower, upper))
-            midpoints.append(midpoint)
 
         # Fuzzifikasi
         def fuzzy_label(value):
@@ -143,18 +139,18 @@ with tabs[3]:
                     return f"A{idx + 1}"
             return None
 
-        df_kurs['Fuzzy Set'] = df_kurs[kolom_kurs].apply(fuzzy_label)
+        df_kurs["Fuzzy Set"] = df_kurs[kolom_kurs].apply(fuzzy_label)
 
-        # Perhitungan prediksi
         hasil_list = []
 
         for i in range(3, len(df_kurs)):
             E_i = df_kurs[kolom_kurs].iloc[i - 1]
             E_i_1 = df_kurs[kolom_kurs].iloc[i - 2]
             E_i_2 = df_kurs[kolom_kurs].iloc[i - 3]
+
             D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
 
-            values = [
+            values_to_check = [
                 E_i + D_i / 2, E_i - D_i / 2,
                 E_i + D_i, E_i - D_i,
                 E_i + D_i / 4, E_i - D_i / 4,
@@ -172,8 +168,9 @@ with tabs[3]:
 
             low, high = intervals[interval_idx]
             mid = (low + high) / 2
-            R_sum = sum(v for v in values if low <= v <= high)
-            S = sum(1 for v in values if low <= v <= high)
+
+            R_sum = sum(val for val in values_to_check if low <= val <= high)
+            S = sum(1 for val in values_to_check if low <= val <= high)
 
             F_j = (R_sum + mid) / (S + 1) if S > 0 else mid
             df_kurs.at[i, 'Prediksi'] = round(F_j, 2)
@@ -185,7 +182,7 @@ with tabs[3]:
                 'Prediksi': round(F_j, 2)
             })
 
-        # Tambah 3 baris awal tanpa prediksi
+        # Tambahkan 3 baris awal tanpa prediksi
         for j in range(3):
             hasil_list.insert(j, {
                 'i': j,
@@ -201,26 +198,22 @@ with tabs[3]:
 
         st.markdown(f"### 📈 Grafik Aktual vs Prediksi {tipe_kurs}")
         st.line_chart(df_hasil_perhitungan.set_index("Tanggal")[["Aktual", "Prediksi"]])
-        # Tambahan: Visualisasi Matplotlib Kurs Jual
-if tipe_kurs == "Kurs Jual":
-    st.markdown("### 📊 Grafik Matplotlib: Kurs Jual Aktual vs Prediksi")
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Aktual'], label='Aktual', marker='o')
-    ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Prediksi'], label='Prediksi', marker='x')
-    ax.set_xlabel("Tanggal")
-    ax.set_ylabel("Kurs Jual")
-    ax.set_title("Perbandingan Kurs Jual Yuan vs Prediksi")
-    ax.legend()
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    st.pyplot(fig)
+        # Tambahan: Grafik Matplotlib
+        st.markdown(f"### 📊 Grafik Matplotlib: {tipe_kurs} Aktual vs Prediksi")
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Aktual'], label='Aktual', marker='o')
+        ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Prediksi'], label='Prediksi', marker='x')
+        ax.set_xlabel("Tanggal")
+        ax.set_ylabel(tipe_kurs)
+        ax.set_title(f"Perbandingan {tipe_kurs} vs Prediksi")
+        ax.legend()
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        st.pyplot(fig)
 
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
-
-
-
 
 # Tab 4: Prediksi Masa Depan
 with tabs[4]:
