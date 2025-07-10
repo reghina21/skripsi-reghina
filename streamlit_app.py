@@ -40,7 +40,7 @@ st.markdown("""
     /* Warning message styling */
     div[data-testid="stNotificationContentWarning"] {
         color: #a61e4d !important;
-        background-color: #fff0f5 !important;
+        background-color: #0000 !important;
         font-weight: bold;
         border: 1px solid #f5c2d7;
         border-radius: 8px;
