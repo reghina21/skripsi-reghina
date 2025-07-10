@@ -39,8 +39,8 @@ st.markdown("""
 
     /* Warning message styling */
     div[data-testid="stNotificationContentWarning"] {
-        color: #a61e4d !important;
-        background-color: #0000 !important;
+        color: #000000 !important;              /* ⬅ warna hitam */
+        background-color: #fff0f5 !important;
         font-weight: bold;
         border: 1px solid #f5c2d7;
         border-radius: 8px;
@@ -65,6 +65,7 @@ st.markdown("""
 
     <div class="watermark">© Reghina Ajeng Santika</div>
 """, unsafe_allow_html=True)
+
 
 
 
