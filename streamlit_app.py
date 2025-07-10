@@ -29,7 +29,7 @@ with tabs[0]:
 
 # Tab 1: Upload Dataset
 with tabs[1]:
-    st.subheader("Upload Dataset Kurs")
+    st.subheader("Upload Dataset Kur")
     uploaded_file = st.file_uploader(
         "Upload file Excel dengan kolom: NO, Nilai, Kurs Jual, Kurs Beli, Tanggal",
         type=["xlsx"]
