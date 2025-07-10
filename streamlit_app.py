@@ -107,7 +107,6 @@ with tabs[3]:
     if st.session_state.get('preprocessed', False):
         df_kurs_jual = st.session_state.df_kurs_jual.copy()
 
-        # Asumsikan interval sudah dihitung sebelumnya
         kolom_kurs = "Kurs Jual"
         n = len(df_kurs_jual)
         K = round(1 + 3.322 * math.log10(n))
@@ -122,13 +121,13 @@ with tabs[3]:
             upper = lower + I
             intervals.append((lower, upper))
 
-        def fuzzy_label(value):
-            for idx, (low, high) in enumerate(intervals):
+        def fuzzy_label(value, interval_list):
+            for idx, (low, high) in enumerate(interval_list):
                 if low <= value <= high:
                     return f"A{idx + 1}"
             return None
 
-        df_kurs_jual['Fuzzy_Set'] = df_kurs_jual[kolom_kurs].apply(fuzzy_label)
+        df_kurs_jual['Fuzzy_Set'] = df_kurs_jual[kolom_kurs].apply(lambda x: fuzzy_label(x, intervals))
 
         hasil_list = []
 
