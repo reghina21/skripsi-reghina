@@ -128,15 +128,6 @@ with tabs[3]:
             intervals.append((lower, upper))
             midpoints.append(midpoint)
 
-        # Tampilkan tabel interval dan midpoint
-        df_intervals = pd.DataFrame({
-            'Interval': [f"[{low:.2f}, {high:.2f}]" for (low, high) in intervals],
-            'Midpoint': [round(mp, 2) for mp in midpoints]
-        })
-
-        st.markdown("### 📐 Interval Fuzzy Berdasarkan Aturan Sturges")
-        st.dataframe(df_intervals)
-
         # Fuzzifikasi nilai Kurs Beli
         def fuzzy_label(value):
             for idx, (low, high) in enumerate(intervals):
