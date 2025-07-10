@@ -196,12 +196,9 @@ with tabs[3]:
         st.markdown(f"### 🔍 Tabel Hasil Prediksi {tipe_kurs}")
         st.dataframe(df_hasil_perhitungan[['Tanggal', 'Aktual', 'Prediksi']])
 
-        st.markdown(f"### 📈 Grafik Aktual vs Prediksi {tipe_kurs}")
-        st.line_chart(df_hasil_perhitungan.set_index("Tanggal")[["Aktual", "Prediksi"]])
-
         # Tambahan: Grafik Matplotlib
-        st.markdown(f"### 📊 Grafik Matplotlib: {tipe_kurs} Aktual vs Prediksi")
-        fig, ax = plt.subplots(figsize=(12, 6))
+        st.markdown(f"### 📊 Grafik {tipe_kurs} Aktual vs Prediksi")
+        fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Aktual'], label='Aktual', marker='o')
         ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Prediksi'], label='Prediksi', marker='x')
         ax.set_xlabel("Tanggal")
