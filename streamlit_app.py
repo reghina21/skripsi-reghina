@@ -201,6 +201,20 @@ with tabs[3]:
 
         st.markdown(f"### 📈 Grafik Aktual vs Prediksi {tipe_kurs}")
         st.line_chart(df_hasil_perhitungan.set_index("Tanggal")[["Aktual", "Prediksi"]])
+        # Tambahan: Visualisasi Matplotlib Kurs Jual
+if tipe_kurs == "Kurs Jual":
+    st.markdown("### 📊 Grafik Matplotlib: Kurs Jual Aktual vs Prediksi")
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Aktual'], label='Aktual', marker='o')
+    ax.plot(df_hasil_perhitungan['Tanggal'], df_hasil_perhitungan['Prediksi'], label='Prediksi', marker='x')
+    ax.set_xlabel("Tanggal")
+    ax.set_ylabel("Kurs Jual")
+    ax.set_title("Perbandingan Kurs Jual Yuan vs Prediksi")
+    ax.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    st.pyplot(fig)
 
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
