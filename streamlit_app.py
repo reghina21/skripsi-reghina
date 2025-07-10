@@ -29,7 +29,7 @@ with tabs[0]:
 
 # Tab 1: Upload Dataset
 with tabs[1]:
-    st.subheader("Upload Dataset Kur")
+    st.subheader("Upload Dataset Kurs")
     uploaded_file = st.file_uploader(
         "Upload file Excel dengan kolom: NO, Nilai, Kurs Jual, Kurs Beli, Tanggal",
         type=["xlsx"]
@@ -167,4 +167,3 @@ with tabs[4]:
         st.line_chart(df_future.set_index("Tanggal"))
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
-\
