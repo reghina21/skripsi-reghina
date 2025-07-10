@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
