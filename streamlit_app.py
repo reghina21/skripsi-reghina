@@ -6,7 +6,7 @@ from datetime import timedelta
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
-
+...
 # Navigasi atas dengan tabs
 tabs = st.tabs([
     "🏠 Home",
