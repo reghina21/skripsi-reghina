@@ -234,7 +234,7 @@ def ambil_nilai_terakhir(df, n=3):
     return hasil, sumber
 
 # 🔁 Prediksi 5 Periode ke Depan
-gabungan_data = df_kurs_beli[['Kurs Beli', 'Fuzzy Set', 'Prediksi']].copy()
+gabungan_data = df_kurs_beli[['Kurs Beli', 'Fuzzy_Set', 'Prediksi']].copy()
 data_awal = gabungan_data[gabungan_data['Prediksi'].notnull()].iloc[-3:].copy()
 
 n_prediksi = 5
