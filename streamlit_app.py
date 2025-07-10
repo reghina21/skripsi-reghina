@@ -113,8 +113,8 @@ with tabs[3]:
 
         Dmax = df_kurs_beli['Kurs Beli'].max()
         Dmin = df_kurs_beli['Kurs Beli'].min()
-        D1 = 5  # Nilai penyesuaian bawah
-        D2 = 5  # Nilai penyesuaian atas
+        D1 = 0  # Nilai penyesuaian bawah
+        D2 = 0  # Nilai penyesuaian atas
 
         R = (Dmax + D2) - (Dmin - D1)
         I = R / K  # Lebar interval
