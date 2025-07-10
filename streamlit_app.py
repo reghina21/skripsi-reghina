@@ -99,11 +99,91 @@ with tabs[2]:
         st.warning("Mohon upload file terlebih dahulu di tab Dataset.")
 
 # Tab 3: Visualisasi Dataset
+# Tab 3: Hasil Prediksi
 with tabs[3]:
-    st.subheader("Hasil Prediksi")
+    st.subheader("📊 Hasil Prediksi Kurs Beli")
+
     if st.session_state.get('preprocessed', False):
-        df = st.session_state.df
-        st.line_chart(df)
+        df_kurs_beli = st.session_state.df_kurs_beli.copy()
+
+        # Tambahkan kolom Fuzzy Set dummy (contoh)
+        # Gantilah dengan metode fuzzifikasi sebenarnya jika tersedia
+        def fuzzy_label(value):
+            if value < 14500:
+                return "A1"
+            elif value < 15000:
+                return "A2"
+            else:
+                return "A3"
+
+        df_kurs_beli['Fuzzy Set'] = df_kurs_beli['Kurs Beli'].apply(fuzzy_label)
+
+        # Dummy interval (harus sesuai dengan fuzzifikasi sebenarnya)
+        intervals = [(14000, 14500), (14501, 15000), (15001, 15500)]
+
+        hasil_list = []
+
+        for i in range(3, len(df_kurs_beli)):
+            E_i = df_kurs_beli['Kurs Beli'].iloc[i - 1]
+            E_i_1 = df_kurs_beli['Kurs Beli'].iloc[i - 2]
+            E_i_2 = df_kurs_beli['Kurs Beli'].iloc[i - 3]
+
+            D_i = abs(abs(E_i - E_i_1) - abs(E_i_1 - E_i_2))
+
+            X_i = E_i + D_i / 2
+            XX_i = E_i - D_i / 2
+            Y_i = E_i + D_i
+            YY_i = E_i - D_i
+            P_i = E_i + D_i / 4
+            PP_i = E_i - D_i / 4
+            Q_i = E_i + 2 * D_i
+            QQ_i = E_i - 2 * D_i
+            G_i = E_i + D_i / 6
+            GG_i = E_i - D_i / 6
+            H_i = E_i + 3 * D_i
+            HH_i = E_i - 3 * D_i
+
+            values_to_check = [X_i, XX_i, Y_i, YY_i, P_i, PP_i, Q_i, QQ_i, G_i, GG_i, H_i, HH_i]
+
+            fuzzy_i1 = df_kurs_beli['Fuzzy Set'].iloc[i]
+            interval_idx = int(fuzzy_i1[1:]) - 1 if fuzzy_i1[1:].isdigit() else -1
+
+            if interval_idx < 0 or interval_idx >= len(intervals):
+                df_kurs_beli.at[i, 'Prediksi'] = None
+                continue
+
+            low, high = intervals[interval_idx]
+            mid = (low + high) / 2
+
+            R = sum(val for val in values_to_check if low <= val <= high)
+            S = sum(1 for val in values_to_check if low <= val <= high)
+
+            F_j = (R + mid) / (S + 1) if S > 0 else mid
+            df_kurs_beli.at[i, 'Prediksi'] = round(F_j, 2)
+
+            hasil_list.append({
+                'i': i,
+                'Tanggal': df_kurs_beli.index[i],
+                'Aktual': df_kurs_beli['Kurs Beli'].iloc[i],
+                'Prediksi': round(F_j, 2)
+            })
+
+        # Tambahkan 3 baris awal tanpa prediksi
+        for j in range(3):
+            hasil_list.insert(j, {
+                'i': j,
+                'Tanggal': df_kurs_beli.index[j],
+                'Aktual': df_kurs_beli['Kurs Beli'].iloc[j],
+                'Prediksi': None
+            })
+
+        df_hasil_perhitungan_beli = pd.DataFrame(hasil_list)
+
+        # Tampilkan hasil
+        st.dataframe(df_hasil_perhitungan_beli[['Tanggal', 'Aktual', 'Prediksi']])
+
+        # Visualisasi
+        st.line_chart(df_hasil_perhitungan_beli.set_index("Tanggal")[["Aktual", "Prediksi"]])
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
 
