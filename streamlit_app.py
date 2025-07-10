@@ -7,13 +7,28 @@ st.title("📊 Dashboard Peramalan Kurs Yuan & Dollar")
 
 # Navigasi atas dengan tabs
 tabs = st.tabs([
+    "🏠 Home",
     "📁 Dataset",
     "🧹 Preprocessing",
-    "🔮 Hasil Prediksi"
+    "📊 Visualisasi",
+    "⏭️ Prediksi Masa Depan"
 ])
 
-# Tab 1: Upload Dataset
+# Tab Home
 with tabs[0]:
+    st.header("Selamat Datang di Dashboard Peramalan Kurs")
+    st.markdown("""
+    Dashboard ini dirancang untuk membantu Anda melakukan:
+    - Upload dan eksplorasi dataset kurs
+    - Preprocessing data
+    - Visualisasi kurs jual dan beli
+    - Prediksi kurs jual di masa depan
+
+    Silakan mulai dengan mengunggah dataset Anda di tab **📁 Dataset**.
+    """)
+
+# Tab 1: Upload Dataset
+with tabs[1]:
     st.subheader("Upload Dataset Kurs")
     uploaded_file = st.file_uploader(
         "Upload file Excel dengan kolom: NO, Nilai, Kurs Jual, Kurs Beli, Tanggal",
@@ -39,7 +54,7 @@ with tabs[0]:
         st.dataframe(st.session_state.df_raw)
 
 # Tab 2: Preprocessing
-with tabs[1]:
+with tabs[2]:
     st.subheader("Hasil Preprocessing Data Kurs")
 
     if 'df_raw' in st.session_state:
@@ -84,23 +99,27 @@ with tabs[1]:
         st.warning("Mohon upload file terlebih dahulu di tab Dataset.")
 
 # Tab 3: Visualisasi Dataset
-with tabs[2]:
-    st.subheader("Visualisasi Dataset Terpilih")
+with tabs[3]:
+    st.subheader("Visualisasi Dataset")
     if st.session_state.get('preprocessed', False):
         df = st.session_state.df
+        st.line_chart(df)
+    else:
+        st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
+
+# Tab 4: Prediksi Masa Depan
+with tabs[4]:
+    st.subheader("🔮 Prediksi Kurs Jual ke Depan")
+    if st.session_state.get('preprocessed', False):
         df_kurs_jual = st.session_state.df_kurs_jual
 
-        # Dummy function fuzzy_label, silakan sesuaikan
         def fuzzy_label(value):
-            return "A1"  # placeholder, sesuaikan dengan logika fuzzy Anda
+            return "A1"  # placeholder
 
-        # Dummy interval, sesuaikan dengan logika fuzzy Anda
-        intervals = [(14000, 14500), (14501, 15000), (15001, 15500)]  # contoh
+        intervals = [(14000, 14500), (14501, 15000), (15001, 15500)]
 
-        st.markdown("### 🔮 Peramalan Kurs Jual ke Depan")
         n_forecast = st.number_input("Jumlah hari ke depan yang ingin diramal:", 1, 30, 5)
 
-        # Gunakan data terakhir kurs jual sebagai dasar prediksi awal
         df_hasil = df_kurs_jual.copy()
         df_hasil.rename(columns={"Kurs Jual": "Prediksi"}, inplace=True)
         df_hasil.reset_index(inplace=True)
@@ -108,7 +127,6 @@ with tabs[2]:
         last_known = df_hasil.dropna().copy().tail(3)
         future_preds = []
 
-        # Set tanggal awal ramalan
         start_forecast_date = pd.to_datetime("2025-01-13")
 
         for i in range(n_forecast):
@@ -142,15 +160,11 @@ with tabs[2]:
             next_date = start_forecast_date + pd.Timedelta(days=i)
             future_preds.append({"Tanggal": next_date, "Prediksi Kurs Jual": pred})
 
-            last_known = pd.concat([
-                last_known,
-                pd.DataFrame([{"Tanggal": next_date, "Prediksi": pred}])
-            ], ignore_index=True).tail(3)
+            last_known = pd.concat([last_known, pd.DataFrame([{"Tanggal": next_date, "Prediksi": pred}])], ignore_index=True).tail(3)
 
         df_future = pd.DataFrame(future_preds)
         st.dataframe(df_future)
-
+        st.line_chart(df_future.set_index("Tanggal"))
     else:
         st.warning("Mohon lakukan preprocessing data terlebih dahulu.")
-
-
+\
