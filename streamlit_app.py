@@ -404,7 +404,7 @@ with tabs[4]:
             F_j = (R + mid) / (S + 1) if S > 0 else mid
             F_j = round(F_j, 2)
 
-            fuzzy_new = fuzzy_label(F_j, intervals)
+            fuzzy_new = fuzzy_label(F_j)
 
             prediksi_ke_depan.append({
                 'Tanggal': future_dates[step],
