@@ -23,7 +23,7 @@ with tabs[0]:
     
     Aplikasi ini menggunakan metode Fuzzy Time Series Singh untuk memberikan hasil prediksi yang lebih akurat. Dengan adanya aplikasi ini pengguna dapat dengan mudah dalam mengambil keputusan dengan baik untuk memperkirakan kurs yang ada di periode mendatang.
 
-    Silakan mulai dengan mengunggah dataset Anda di tab *📁 Dataset*.
+    Silakan mulai dengan mengunggah dataset Anda di tab *📁 Dataset* dengan mengikuti aturan yang telah diberikan.
     """)
 
 # Tab 1: Upload Dataset
