@@ -20,6 +20,7 @@ with tabs[0]:
     st.header("Selamat Datang di Kurs Forecast")
     st.markdown("""
     Kurs Forecast merupakan dashboard analisis data yang dirancang untuk membantu pengguna dalam membuat prediksi berdasarkan data historis.
+    
     Aplikasi ini menggunakan metode Fuzzy Time Series Singh untuk memberikan hasil prediksi yang lebih akurat. Dengan adanya aplikasi ini pengguna dapat dengan mudah dalam mengambil keputusan dengan baik untuk memperkirakan kurs yang ada di periode mendatang.
 
     Silakan mulai dengan mengunggah dataset Anda di tab *📁 Dataset*.
