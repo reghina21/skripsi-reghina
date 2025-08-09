@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import math
 from datetime import timedelta
 
-st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
-st.title("📊 Dashboard Peramalan Kurs")
+st.set_page_config(page_title="Kurs Forecast", layout="wide")
+st.title("📊 Kurs Forecast")
 # Navigasi atas dengan tabs
 tabs = st.tabs([
     "🏠 Home",
@@ -17,13 +17,10 @@ tabs = st.tabs([
 
 # Tab Home
 with tabs[0]:
-    st.header("Selamat Datang di Dashboard Peramalan Kurs")
+    st.header("Selamat Datang di Kurs Forecast")
     st.markdown("""
-    Dashboard ini dirancang untuk membantu Anda melakukan:
-    - Upload dan eksplorasi dataset kurs
-    - Preprocessing data
-    - Visualisasi kurs jual dan beli
-    - Prediksi kurs jual dan beli di masa depan
+    Kurs Forecast merupakan dashboard analisis data yang dirancang untuk membantu pengguna dalam membuat prediksi berdasarkan data historis.
+    Aplikasi ini menggunakan metode Fuzzy Time Series Singh untuk memberikan hasil prediksi yang lebih akurat. Dengan adanya aplikasi ini pengguna dapat dengan mudah dalam mengambil keputusan dengan baik untuk memperkirakan kurs yang ada di periode mendatang.
 
     Silakan mulai dengan mengunggah dataset Anda di tab *📁 Dataset*.
     """)
