@@ -6,69 +6,6 @@ from datetime import timedelta
 
 st.set_page_config(page_title="Dashboard Peramalan Kurs", layout="wide")
 st.title("📊 Dashboard Peramalan Kurs")
-st.markdown("""
-    <style>
-    body, .stApp {
-        background-color: #fceef5;
-        color: #333333;
-        font-family: 'Arial', sans-serif;
-    }
-
-    h1 {
-        color: #d63384 !important;
-        font-weight: bold !important;
-    }
-
-    .st-emotion-cache-1v0mbdj {
-        background-color: #fde2ff !important;
-        padding: 1rem;
-        border-radius: 10px;
-        color: #4d4d4d;
-    }
-
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: #ffe5ec;
-        border-radius: 10px;
-        padding: 5px;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        font-weight: bold;
-        color: #d63384 !important;
-    }
-
-    /* Warning message styling */
-    div[data-testid="stNotificationContentWarning"] {
-        color: #000000 !important;              /* ⬅ warna hitam */
-        background-color: #fff0f5 !important;
-        font-weight: bold;
-        border: 1px solid #f5c2d7;
-        border-radius: 8px;
-    }
-
-    .watermark {
-        position: fixed;
-        bottom: 10px;
-        left: 10px;
-        font-size: 13px;
-        color: #d63384;
-        opacity: 0.7;
-        z-index: 9999;
-        font-style: italic;
-    }
-
-    .stDataFrame {
-        background-color: #fff0f5;
-        border-radius: 5px;
-    }
-    </style>
-
-    <div class="watermark">© Reghina Ajeng Santika</div>
-""", unsafe_allow_html=True)
-
-
-
-
 # Navigasi atas dengan tabs
 tabs = st.tabs([
     "🏠 Home",
