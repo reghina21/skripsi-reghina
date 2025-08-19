@@ -204,7 +204,7 @@ with tabs[3]:
         max_kurs = df_kurs_jual['Kurs Jual'].max()
 
         n_prediksi = 5
-        future_dates = pd.date_range(start=df_kurs_jual.index[-1] + timedelta(days=1), periods=n_prediksi)
+        future_dates = pd.date_range(start='2025-01-13', periods=n_prediksi)
 
         prediksi_ke_depan = []
 
@@ -352,7 +352,7 @@ with tabs[4]:
         max_kurs = df_kurs_beli['Kurs Beli'].max()
 
         n_prediksi = 5
-        future_dates = pd.date_range(start=df_kurs_beli.index[-1] + timedelta(days=1), periods=n_prediksi)
+        future_dates = pd.date_range(start='2025-01-13', periods=n_prediksi)
 
         prediksi_ke_depan = []
 
