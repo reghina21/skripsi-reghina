@@ -191,7 +191,7 @@ with tabs[3]:
         st.pyplot(fig)
 
         # Prediksi Masa Depan
-       st.markdown("### 🔮 Prediksi Masa Depan")
+    st.markdown("### 🔮 Prediksi Masa Depan")
 
         # Fungsi fuzzy label
         def fuzzy_label(value, intervals):
@@ -358,7 +358,7 @@ with tabs[4]:
         st.pyplot(fig)
 
          # Prediksi Masa Depan
-       st.markdown("### 🔮 Prediksi Masa Depan")
+     st.markdown("### 🔮 Prediksi Masa Depan")
 
 # Fungsi fuzzy label
         def fuzzy_label(value, intervals):
