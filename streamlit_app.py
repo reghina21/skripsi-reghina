@@ -392,4 +392,9 @@ with tabs[4]:
                 'Fuzzy': fuzzy_label(F_j, intervals)
             })
 
-            nilai
+            nilai_terakhir = [E_i_1, E_i, F_j]
+
+        df_prediksi_final = pd.DataFrame(prediksi_ke_depan)
+
+        st.markdown("### 📋 Tabel Prediksi 5 Periode Kedepan")
+        st.dataframe(df_prediksi_final)
