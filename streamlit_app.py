@@ -249,7 +249,7 @@ with tabs[3]:
         df_prediksi_final = pd.DataFrame(prediksi_ke_depan)
 
         st.markdown("### 📋 Tabel Prediksi 5 Periode Kedepan")
-        st.dataframe(df_prediksi_final)
+        st.dataframe(df_prediksi_final[['Prediksi']])
 
     else:
         st.warning("⚠️ Mohon lakukan preprocessing data terlebih dahulu.")
@@ -397,4 +397,4 @@ with tabs[4]:
         df_prediksi_final = pd.DataFrame(prediksi_ke_depan)
 
         st.markdown("### 📋 Tabel Prediksi 5 Periode Kedepan")
-        st.dataframe(df_prediksi_final)
+        st.dataframe(df_prediksi_final[['Prediksi']])
